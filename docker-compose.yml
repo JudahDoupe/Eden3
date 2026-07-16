@@ -1,0 +1,8 @@
+services:
+  eden3:
+    build: .
+    container_name: eden3
+    # Fresh host port, clear of BuilderBot's 8787 / 5173 / 11434.
+    ports:
+      - "8092:80"
+    restart: unless-stopped
