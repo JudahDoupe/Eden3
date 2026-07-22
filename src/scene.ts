@@ -42,19 +42,17 @@ export function createScene(aspect = 1): GameScene {
     }
 
     public syncColor(): void {
-      const GREEN_R = 0, GREEN_G = 1, GREEN_B = 0;
+      const green = new Color().setRGB(0, 1, 0);
+      const brown = new Color().setRGB(1, 0.3, 0);
+      const target = this.sphere.material.color;
+
       if (this.state <= 0) {
-        this.sphere.material.color.setRGB(0, 0, 0);
+        target.setRGB(0, 0, 0);
       } else if (this.state >= 10) {
-        this.sphere.material.color.setRGB(GREEN_R, GREEN_G, GREEN_B);
+        target.copy(green);
       } else {
         const t = (this.state - 1) / 9;
-        const BROWN_R = 1, BROWN_G = 0.3, BROWN_B = 0;
-        this.sphere.material.color.setRGB(
-          BROWN_R + (GREEN_R - BROWN_R) * t,
-          BROWN_G + (GREEN_G - BROWN_G) * t,
-          BROWN_B + (GREEN_B - BROWN_B) * t,
-        );
+        target.lerpColors(green, brown, t);
       }
     }
 
