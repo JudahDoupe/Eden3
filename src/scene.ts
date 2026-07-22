@@ -1,13 +1,4 @@
-import {
-  Scene,
-  PerspectiveCamera,
-  Mesh,
-  SphereGeometry,
-  MeshStandardMaterial,
-  DirectionalLight,
-  AmbientLight,
-  Color,
-} from "three";
+import { Scene, PerspectiveCamera, Mesh, SphereGeometry, MeshStandardMaterial, DirectionalLight, AmbientLight, Color } from "three";
 
 /** The sphere's colour, kept as a named constant so tests and code agree. */
 export const SPHERE_COLOR = 0x00ff00;
@@ -18,7 +9,7 @@ export interface GameScene {
   sphere: Mesh;
 }
 
-/**
+/** 
  * Build the scene graph: a single green sphere at the origin, a camera looking at
  * it, and lighting so the standard material is actually lit. Kept free of any
  * `WebGLRenderer` / DOM so it can be constructed and asserted in a headless test —
@@ -27,6 +18,7 @@ export interface GameScene {
 export function createScene(aspect = 1): GameScene & {
   vitality: number;
   updateVitality(dtMs: number): void;
+  syncColor(): void;
 } {
   const scene = new Scene();
   scene.background = new Color(0x101018);
@@ -47,6 +39,32 @@ export function createScene(aspect = 1): GameScene & {
   scene.add(key);
   scene.add(new AmbientLight(0xffffff, 0.4));
 
+  // Color thresholds for vitality interpolation (precomputed to avoid repeated division)
+  const GREEN_R = 0;       // Pure Green (matches 0x00FF00)
+  const GREEN_G = 1;
+  const GREEN_B = 0;
+
+  const BROWN_R   = 1;    // Brown approximation
+  const BROWN_G   = 0.3;
+  const BROWN_B   = 0;
+
+  function applyColor(vitalityValue: number): void {
+    if (vitalityValue <= 0) {
+      sphere.material.color.setRGB(0, 0, 0);
+    } else if (vitalityValue >= 10) {
+      sphere.material.color.setRGB(GREEN_R, GREEN_G, GREEN_B);
+    } else {
+      const t = (vitalityValue - 1) / 9; // Proportional interpolation factor [0..1] mapped from vitality range [1..10]
+      sphere.material.color.setRGB(
+        BROWN_R + (GREEN_R - BROWN_R) * t,
+        BROWN_G + (GREEN_G - BROWN_G) * t,
+        BROWN_B + (GREEN_B - BROWN_B) * t,
+      );
+    }
+  }
+
+  applyColor(10); // Initialize to full health green
+
   let acc: number = 0;
 
   return {
@@ -61,6 +79,10 @@ export function createScene(aspect = 1): GameScene & {
         this.vitality--;
         acc -= 1;
       }
+      applyColor(this.vitality);
+    },
+    syncColor(): void {
+      applyColor(this.vitality);
     },
   };
 }
