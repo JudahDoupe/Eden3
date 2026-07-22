@@ -24,7 +24,10 @@ export interface GameScene {
  * `WebGLRenderer` / DOM so it can be constructed and asserted in a headless test —
  * `main.ts` owns the renderer and the animation loop.
  */
-export function createScene(aspect = 1): GameScene {
+export function createScene(aspect = 1): GameScene & {
+  vitality: number;
+  updateVitality(dtMs: number): void;
+} {
   const scene = new Scene();
   scene.background = new Color(0x101018);
 
@@ -44,5 +47,20 @@ export function createScene(aspect = 1): GameScene {
   scene.add(key);
   scene.add(new AmbientLight(0xffffff, 0.4));
 
-  return { scene, camera, sphere };
+  let acc: number = 0;
+
+  return {
+    scene,
+    camera,
+    sphere,
+    vitality: 10,
+    updateVitality(dtMs: number): void {
+      if (this.vitality <= 0) return;
+      acc += dtMs;
+      while (acc >= 1 && this.vitality > 0) {
+        this.vitality--;
+        acc -= 1;
+      }
+    },
+  };
 }
