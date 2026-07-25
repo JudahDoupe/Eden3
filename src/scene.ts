@@ -33,30 +33,26 @@ export function createScene(aspect = 1): GameScene {
 
     public update(dtMs: number): void {
       if (this.state <= 0) return;
+      
+      const green = new Color(0, 1, 0);
+      const brown = new Color(1, 0.3, 0);
+
       this.acc += dtMs;
       while (this.acc >= 1 && this.state > 0) {
         this.state--;
         this.acc -= 1;
       }
-      this.syncColor();
-    }
 
-    public syncColor(): void {
-      const green = new Color().setRGB(0, 1, 0);
-      const brown = new Color().setRGB(1, 0.3, 0);
-      const target = this.sphere.material.color;
-
+      // Direct material binding for real-time updates without intermediate wrappers
       if (this.state <= 0) {
-        target.setRGB(0, 0, 0);
+        this.sphere.material.color.setRGB(0, 0, 0);
       } else if (this.state >= 10) {
-        target.copy(green);
+        this.sphere.material.color.copy(green);
       } else {
         const t = (this.state - 1) / 9;
-        target.lerpColors(green, brown, t);
+        this.sphere.material.color.lerpColors(green, brown, t);
       }
     }
-
-    public getVitality(): number { return this.state; }
   }
 
   const sphere = new Mesh(
@@ -75,8 +71,5 @@ export function createScene(aspect = 1): GameScene {
   scene.add(key);
   scene.add(new AmbientLight(0xffffff, 0.4));
 
-  // Initialize to full health green as per original lifecycle setup
-  system.syncColor();
-
-  return { scene, camera, sphere };
+      return { scene, camera, sphere };
 }
