@@ -3,24 +3,83 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Eden3</title>
+    <title>Eden</title>
     <style>
+      :root {
+        color-scheme: dark;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+      }
       html,
       body {
         margin: 0;
         height: 100%;
         overflow: hidden;
-        background: #000;
+        background: #0b1016;
+        color: #dce6f0;
       }
-      #app {
+      #canvas {
         display: block;
         width: 100vw;
         height: 100vh;
       }
+      /* The overlay must not swallow camera drags; panels opt back in. */
+      #ui {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+      }
+      .panel {
+        pointer-events: auto;
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        min-width: 11rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid #23303d;
+        border-radius: 0.5rem;
+        background: #0f161ee6;
+        backdrop-filter: blur(6px);
+      }
+      .panel h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #7fd4a0;
+      }
+      .panel dl {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 0.15rem 0.75rem;
+        margin: 0 0 0.75rem;
+        font-size: 0.85rem;
+      }
+      .panel dt {
+        color: #7d8fa1;
+      }
+      .panel dd {
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .panel button {
+        width: 100%;
+        padding: 0.4rem;
+        border: 1px solid #2f4a3c;
+        border-radius: 0.3rem;
+        background: #17251d;
+        color: #9fe0bb;
+        font: inherit;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+      .panel button:hover {
+        background: #1e3226;
+      }
     </style>
   </head>
   <body>
-    <canvas id="app"></canvas>
-    <script type="module" src="/src/main.ts"></script>
+    <canvas id="canvas"></canvas>
+    <div id="ui"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
