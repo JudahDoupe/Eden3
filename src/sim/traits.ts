@@ -1,5 +1,7 @@
-import { trait } from "koota";
+import { trait, type Entity } from "koota";
+import { createGrid, type Grid } from "./grid";
 import { Rng } from "./rng";
+import { Terrains } from "./terrain";
 
 /**
  * Koota traits for Eden.
@@ -38,3 +40,34 @@ export const RunState = trait({
   deadlockTurns: 0,
   version: 0,
 });
+
+/**
+ * The voxel grid plus a linear index -> entity lookup.
+ *
+ * Held on the world so a world remains self-contained, and so movement and
+ * neighbourhood queries can resolve a voxel entity without a query per lookup —
+ * this is on the hot path for every creature that moves.
+ */
+export const GridIndex = trait(() => ({
+  grid: createGrid({ x: 1, y: 1, z: 1 }) as Grid,
+  entities: [] as Entity[],
+}));
+
+// --- Voxel entities ---------------------------------------------------------
+
+export const Voxel = trait({ x: 0, y: 0, z: 0, index: 0 });
+
+/** Exactly one terrain bit. See `terrain.ts` for why it is a bit, not an ordinal. */
+export const Terrain = trait({ kind: Terrains.bit.AIR });
+
+/** Current levels, all normalised to [0, 1]. */
+export const Resources = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });
+
+/** Resting levels this voxel drifts back toward. Fixed by terrain and depth. */
+export const ResourceBaseline = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });
+
+/**
+ * Per-turn changes accumulated by creatures and applied in one pass at the end
+ * of the phase, so results do not depend on simulation order.
+ */
+export const ResourceDelta = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });

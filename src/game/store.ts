@@ -1,6 +1,7 @@
 import type { World } from "koota";
+import { applyEnvironment } from "../sim/resources";
 import { Clock, RunState, type Phase } from "../sim/traits";
-import { bumpVersion, createSimWorld, DEFAULT_CONFIG, type SimConfig } from "../sim/world";
+import { bumpVersion, createSimWorld, type SimConfig } from "../sim/world";
 
 /**
  * The single bridge between the simulation and everything that watches it.
@@ -14,42 +15,57 @@ export interface GameSnapshot {
   turn: number;
   phase: Phase;
   version: number;
+  /** Voxel the player is inspecting, or null. Drives targeting from M4 on. */
+  selectedVoxel: number | null;
 }
 
 export interface GameStore {
   /** The live simulation world. Read freely; mutate only through this store. */
   readonly world: World;
   subscribe(listener: () => void): () => void;
-  /** Referentially stable between version bumps, as `useSyncExternalStore` requires. */
+  /** Referentially stable while nothing has changed, as `useSyncExternalStore` requires. */
   getSnapshot(): GameSnapshot;
   /** Advance the simulation one phase. */
   step(): void;
+  selectVoxel(index: number | null): void;
   /** Abandon the current run and start a fresh one. */
-  reset(config?: SimConfig): void;
+  reset(config?: Partial<SimConfig>): void;
 }
 
-export function createGameStore(config: SimConfig = DEFAULT_CONFIG): GameStore {
+export function createGameStore(config: Partial<SimConfig> = {}): GameStore {
   let world = createSimWorld(config);
   const listeners = new Set<() => void>();
-  let snapshot: GameSnapshot = readSnapshot(world);
+  let selectedVoxel: number | null = null;
+  let snapshot: GameSnapshot = read();
 
-  function readSnapshot(w: World): GameSnapshot {
-    const clock = w.get(Clock);
-    const run = w.get(RunState);
+  function read(): GameSnapshot {
+    const clock = world.get(Clock);
+    const run = world.get(RunState);
     return {
       turn: clock?.turn ?? 0,
       phase: run?.phase ?? "player",
       version: run?.version ?? 0,
+      selectedVoxel,
     };
   }
 
+  function same(a: GameSnapshot, b: GameSnapshot): boolean {
+    return (
+      a.turn === b.turn &&
+      a.phase === b.phase &&
+      a.version === b.version &&
+      a.selectedVoxel === b.selectedVoxel
+    );
+  }
+
   /**
-   * Recompute only when the version actually moved. Returning a fresh object
-   * on every call would make `useSyncExternalStore` re-render forever.
+   * Swap in a new snapshot only when something actually changed. Returning a
+   * fresh object on every call would make `useSyncExternalStore` re-render
+   * forever, and pointer movement calls `selectVoxel` constantly.
    */
   function publish(): void {
-    const next = readSnapshot(world);
-    if (next.version === snapshot.version) return;
+    const next = read();
+    if (same(next, snapshot)) return;
     snapshot = next;
     for (const listener of listeners) listener();
   }
@@ -69,18 +85,24 @@ export function createGameStore(config: SimConfig = DEFAULT_CONFIG): GameStore {
     },
 
     step() {
-      // TODO(M3): replace with `runSimulationPhase(world)`. Until the action
-      // registry exists this only advances the clock, which is enough to prove
-      // the sim -> store -> React path end to end.
+      // TODO(M3): replace with `runSimulationPhase(world)`. Until creatures
+      // exist there is nothing to simulate before the environment settles.
       const clock = world.get(Clock);
       if (clock) world.set(Clock, { turn: clock.turn + 1 });
+      applyEnvironment(world);
       bumpVersion(world);
+      publish();
+    },
+
+    selectVoxel(index) {
+      selectedVoxel = index;
       publish();
     },
 
     reset(next = config) {
       world = createSimWorld(next);
-      snapshot = readSnapshot(world);
+      selectedVoxel = null;
+      snapshot = read();
       for (const listener of listeners) listener();
     },
   };

@@ -2,14 +2,16 @@ import {
   AmbientLight,
   Color,
   DirectionalLight,
-  GridHelper,
   PerspectiveCamera,
+  Raycaster,
   Scene,
+  Vector2,
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { World } from "koota";
-import type { SimConfig } from "../sim/world";
+import { getGrid } from "../sim/world";
+import { createVoxelLayer, type VoxelLayer } from "./voxelLayer";
 
 /**
  * The three.js layer.
@@ -31,30 +33,31 @@ export interface Renderer {
   dispose(): void;
 }
 
-export function createRenderer(canvas: HTMLCanvasElement, config: SimConfig): Renderer {
+export function createRenderer(canvas: HTMLCanvasElement, world: World): Renderer {
   const renderer = new WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   const scene = new Scene();
   scene.background = new Color(0x0b1016);
 
+  const { size } = getGrid(world);
   const camera = new PerspectiveCamera(55, 1, 0.1, 500);
-  const { x, y, z } = config.size;
-  camera.position.set(x * 1.4, y * 1.8, z * 1.4);
+  camera.position.set(size.x * 1.5, size.y * 2, size.z * 1.5);
 
   const controls = new OrbitControls(camera, canvas);
   controls.enableDamping = true;
-  controls.target.set(x / 2, y / 4, z / 2);
+  controls.target.set((size.x - 1) / 2, (size.y - 1) / 3, (size.z - 1) / 2);
 
-  const key = new DirectionalLight(0xffffff, 2);
-  key.position.set(x, y * 3, z);
+  const key = new DirectionalLight(0xffffff, 2.2);
+  key.position.set(size.x, size.y * 3, size.z);
   scene.add(key);
-  scene.add(new AmbientLight(0xffffff, 0.5));
+  scene.add(new AmbientLight(0xffffff, 0.55));
 
-  // Placeholder ground reference until M2 renders real voxels.
-  const grid = new GridHelper(Math.max(x, z), Math.max(x, z), 0x2a3a4a, 0x18242e);
-  grid.position.set(x / 2, 0, z / 2);
-  scene.add(grid);
+  const voxels: VoxelLayer = createVoxelLayer(world);
+  scene.add(voxels.object);
+
+  const raycaster = new Raycaster();
+  const pointer = new Vector2();
 
   function resize(): void {
     const w = window.innerWidth;
@@ -72,25 +75,33 @@ export function createRenderer(canvas: HTMLCanvasElement, config: SimConfig): Re
   });
 
   return {
-    sync(_world: World) {
-      // TODO(M2): rebuild the voxel InstancedMesh from Voxel/Terrain/Resources.
+    sync(currentWorld) {
+      voxels.sync(currentWorld);
       // TODO(M3): rebuild the creature InstancedMesh from Creature entities.
     },
 
-    highlight(_voxelIndices: readonly number[]) {
-      // TODO(M4): tint legal targets when a card is selected.
+    highlight(voxelIndices) {
+      voxels.highlight(voxelIndices);
+      voxels.sync(world);
     },
 
-    pick(_clientX: number, _clientY: number) {
-      // TODO(M2): raycast the voxel InstancedMesh and map instance id -> voxel.
-      return null;
+    pick(clientX, clientY) {
+      const rect = canvas.getBoundingClientRect();
+      pointer.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+
+      // Nearest hit wins, so the surface the cursor is actually over is chosen
+      // rather than something buried behind it.
+      const [hit] = raycaster.intersectObjects(voxels.pickTargets, false);
+      return hit ? voxels.resolve(hit) : null;
     },
 
     dispose() {
       renderer.setAnimationLoop(null);
       window.removeEventListener("resize", resize);
       controls.dispose();
-      grid.geometry.dispose();
+      voxels.dispose();
       renderer.dispose();
     },
   };

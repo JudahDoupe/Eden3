@@ -1,4 +1,6 @@
+import { inspectVoxel } from "../game/inspect";
 import { useGameSnapshot, useGameStore } from "./useGame";
+import { VoxelInspector } from "./VoxelInspector";
 
 /**
  * The DOM overlay above the three.js canvas.
@@ -8,7 +10,9 @@ import { useGameSnapshot, useGameStore } from "./useGame";
  */
 export function App() {
   const store = useGameStore();
-  const { turn, phase } = useGameSnapshot();
+  const { turn, phase, selectedVoxel } = useGameSnapshot();
+
+  const info = selectedVoxel === null ? null : inspectVoxel(store.world, selectedVoxel);
 
   return (
     <div className="hud">
@@ -24,6 +28,8 @@ export function App() {
           Pass
         </button>
       </div>
+
+      {info ? <VoxelInspector info={info} /> : <p className="hint">Hover a voxel to inspect it</p>}
     </div>
   );
 }

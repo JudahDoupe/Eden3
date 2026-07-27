@@ -35,6 +35,33 @@ describe("createGameStore", () => {
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
+  it("tracks voxel selection and notifies once per change", () => {
+    const store = createGameStore();
+    const listener = vi.fn();
+    store.subscribe(listener);
+
+    store.selectVoxel(12);
+    expect(store.getSnapshot().selectedVoxel).toBe(12);
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    // Pointer movement re-reports the same voxel constantly; that must not
+    // turn into a React render per event.
+    store.selectVoxel(12);
+    store.selectVoxel(12);
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    store.selectVoxel(null);
+    expect(store.getSnapshot().selectedVoxel).toBeNull();
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it("clears selection on reset", () => {
+    const store = createGameStore();
+    store.selectVoxel(5);
+    store.reset();
+    expect(store.getSnapshot().selectedVoxel).toBeNull();
+  });
+
   it("reseeds the world on reset", () => {
     const store = createGameStore({ seed: 1, size: { x: 2, y: 2, z: 2 } });
     store.step();
