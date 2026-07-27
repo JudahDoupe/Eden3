@@ -296,6 +296,50 @@
         color: #d98a5a;
       }
 
+      /* --- Lineage ------------------------------------------------------ */
+      .panel--lineage {
+        top: 12.5rem;
+        left: 1rem;
+        min-width: 12rem;
+        max-height: 32vh;
+        overflow-y: auto;
+      }
+      .tree {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.72rem;
+      }
+      .tree__row {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.08rem 0;
+      }
+      .tree__dot {
+        flex: none;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-radius: 50%;
+      }
+      .tree__name {
+        flex: 1;
+      }
+      .tree__count {
+        color: #64798c;
+        font-variant-numeric: tabular-nums;
+      }
+      /* A lost lineage stays visible: it is usually why a later card is stuck. */
+      .tree__row--extinct {
+        opacity: 0.45;
+      }
+      .tree__row--extinct .tree__name {
+        text-decoration: line-through;
+      }
+      .tree__row--extinct .tree__count {
+        color: #a06b6b;
+      }
+
       /* --- Hand --------------------------------------------------------- */
       .hand {
         position: absolute;

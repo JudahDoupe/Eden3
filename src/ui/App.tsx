@@ -1,6 +1,7 @@
 import { inspectVoxel } from "../game/inspect";
 import { EventLog } from "./EventLog";
 import { Hand } from "./Hand";
+import { Lineage } from "./Lineage";
 import { RunEnd } from "./RunEnd";
 import { useGameSnapshot, useGameStore } from "./useGame";
 import { VoxelInspector } from "./VoxelInspector";
@@ -54,7 +55,9 @@ export function App() {
 
       {info ? <VoxelInspector info={info} /> : <p className="hint">Hover a voxel to inspect it</p>}
 
-      <EventLog events={store.events(12)} />
+      <Lineage />
+      {/* Over-fetch, since the log filters out movement before showing it. */}
+      <EventLog events={store.events(120)} />
       <Hand />
       <RunEnd />
     </div>

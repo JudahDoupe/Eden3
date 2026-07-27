@@ -8,6 +8,7 @@ import { creaturesIn } from "../sim/species";
 import { terrainName, type TerrainName } from "../sim/terrain";
 import {
   Creature,
+  DescendedFrom,
   Extinct,
   Life,
   OfSpecies,
@@ -61,6 +62,10 @@ export interface SpeciesInfo {
   tags: TagName[];
   population: number;
   extinctTurn: number | null;
+  /** The species this one mutated from, or null for the starting organism. */
+  parentId: string | null;
+  /** Generations from the root, for indenting the lineage tree. */
+  depth: number;
 }
 
 export function inspectVoxel(world: World, index: number): VoxelInfo | null {
@@ -118,18 +123,51 @@ export function inspectCreature(world: World, creature: Entity): CreatureInfo | 
   };
 }
 
-/** Every species in the run, living or extinct, for the lineage and HUD panels. */
+/**
+ * Every species in the run, living or extinct, ordered as a depth-first walk of
+ * the evolutionary tree so the UI can render it by indenting on `depth`.
+ *
+ * Watching the tree branch is a large part of what a run *is*; a flat list of
+ * species names loses the thing the player was actually building.
+ */
 export function inspectSpecies(world: World): SpeciesInfo[] {
-  return [...world.query(Species)].map((entity) => {
+  const entities = [...world.query(Species)];
+
+  const parentOf = new Map<string, string | null>();
+  const byId = new Map<string, (typeof entities)[number]>();
+  for (const entity of entities) {
+    const id = entity.get(Species)!.id;
+    byId.set(id, entity);
+    const parent = entity.targetFor(DescendedFrom);
+    parentOf.set(id, parent?.get(Species)?.id ?? null);
+  }
+
+  const childrenOf = new Map<string | null, string[]>();
+  for (const [id, parentId] of parentOf) {
+    const siblings = childrenOf.get(parentId) ?? [];
+    siblings.push(id);
+    childrenOf.set(parentId, siblings);
+  }
+
+  const out: SpeciesInfo[] = [];
+  const visit = (id: string, depth: number): void => {
+    const entity = byId.get(id)!;
     const species = entity.get(Species)!;
-    const extinct = entity.get(Extinct);
-    return {
-      id: species.id,
+
+    out.push({
+      id,
       name: species.name,
       colorHex: species.colorHex,
       tags: Tags.toNames(entity.get(SpeciesTags)?.mask ?? 0),
       population: world.query(Creature, OfSpecies(entity)).length,
-      extinctTurn: entity.has(Extinct) ? (extinct?.turn ?? 0) : null,
-    };
-  });
+      extinctTurn: entity.has(Extinct) ? (entity.get(Extinct)?.turn ?? 0) : null,
+      parentId: parentOf.get(id) ?? null,
+      depth,
+    });
+
+    for (const child of childrenOf.get(id) ?? []) visit(child, depth + 1);
+  };
+
+  for (const root of childrenOf.get(null) ?? []) visit(root, 0);
+  return out;
 }
