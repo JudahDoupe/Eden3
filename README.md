@@ -37,6 +37,26 @@ Multi-stage build (Node → nginx) serving the static bundle:
 docker compose up --build   # http://localhost:8092
 ```
 
+## How a run works
+
+1. **Simulation phase.** Every creature of every species takes one turn —
+   producers first, so energy flows in the right direction within a turn. A
+   creature resolves automatic upkeep (ageing, metabolism, death), then picks
+   exactly one action by utility from the actions its species owns and its tags
+   permit.
+2. **Player phase.** Play a mutation onto a species in a voxel, pass, or cycle a
+   stuck card to the bottom of the deck. All three cost a turn.
+
+A creature entity is a *(species, voxel)* pair — "the worms in this voxel", not
+one worm. So at most one creature per species per voxel, reproduction means
+colonising a neighbouring voxel, and carrying capacity falls out of the terrain.
+
+**Tags are the tech tree.** Each action declares tags it requires, so removing a
+tag silently removes behaviour: `algae` strips MOTILE, which disables SWIM and
+REPRODUCE and leaves SEED. Nothing writes that rule down. Because of this, the
+creature inspector shows every action with its gate and score — see
+`explainActions` in `src/sim/actions/index.ts`.
+
 ## Layout
 
 Dependencies flow strictly one way. **The simulation never imports three.js or
@@ -66,7 +86,23 @@ Notable pieces:
 
 Tests run in a `node` environment by default, which is what keeps `sim/` and
 `game/` honest. UI tests opt into a DOM with a `// @vitest-environment jsdom`
-docblock.
+docblock. Koota allows only 16 live worlds per process, so tests build them via
+`src/testing/world.ts`, which releases them after each case.
+
+Three tests are load-bearing and worth knowing about:
+
+- `src/architecture.test.ts` — the layer boundary above.
+- `src/game/cards.test.ts` — walks the tech tree from the starting amoeba and
+  proves every card is reachable. An earlier card set stranded seven cards
+  permanently and nothing else noticed; runs just ran out of legal plays.
+- `src/sim/soak.test.ts` — 500 unattended turns, asserting no NaN, resources in
+  range, one creature per species per voxel, and byte-identical worlds from the
+  same seed (including when the inspector is consulted every turn).
+
+## Not built yet
+
+Meta-progression (the win reward draft, a deck that persists between runs);
+visuals beyond cubes and spheres; in-world UI panels; audio; save/load.
 
 The Vite `base` (public-URL prefix) is set at build time via `--base`, so the same
 app can be published at `/` or under a preview path like `/dev/`.

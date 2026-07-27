@@ -186,7 +186,11 @@ export const CARDS: readonly CardDefinition[] = [
     removesTags: ["MICROBIAL", "DECOMPOSER"],
     grantsActions: ["EAT"],
     habitat: ["WATER"],
-    diet: ["PHOTOSYNTHETIC", "MICROBIAL"],
+    // Grazes algae, not amoebas. Eating MICROBIAL made fish an extinction
+    // button for the starting species, which is the only source of
+    // DECOMPOSER+MOTILE — and losing it strands worm, mold and fungus
+    // permanently. Depending on algae is better ecology and a softer cliff.
+    diet: ["PHOTOSYNTHETIC"],
     needs: { oxygen: 0.35, moisture: 0.6 },
     locomotion: 1,
     life: { maxAge: 28, metabolism: 0.06, reproduceThreshold: 0.7, reproduceCost: 0.35 },
