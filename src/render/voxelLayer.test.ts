@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { createVoxelLayer } from "./voxelLayer";
 import { Terrains } from "../sim/terrain";
 import { Resources, Terrain, Voxel } from "../sim/traits";
-import { createSimWorld, getGrid, voxelAt } from "../sim/world";
+import { getGrid, voxelAt } from "../sim/world";
+import { createTestWorld } from "../testing/world";
 
 /**
  * three.js geometry, materials and instance buffers are CPU-side until they are
@@ -15,7 +16,7 @@ import { createSimWorld, getGrid, voxelAt } from "../sim/world";
 function findSlot(
   layer: ReturnType<typeof createVoxelLayer>,
   mesh: InstancedMesh,
-  world: ReturnType<typeof createSimWorld>,
+  world: ReturnType<typeof createTestWorld>,
   kind: number,
 ): number {
   for (let slot = 0; slot < mesh.count; slot++) {
@@ -25,7 +26,7 @@ function findSlot(
   throw new Error(`no instance of terrain ${kind} in this mesh`);
 }
 
-function terrainCounts(world: ReturnType<typeof createSimWorld>) {
+function terrainCounts(world: ReturnType<typeof createTestWorld>) {
   let solid = 0;
   let water = 0;
   world.query(Voxel, Terrain).readEach(([, terrain]) => {
@@ -37,7 +38,7 @@ function terrainCounts(world: ReturnType<typeof createSimWorld>) {
 
 describe("createVoxelLayer", () => {
   it("instances every non-air voxel exactly once", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const { solid, water } = terrainCounts(world);
 
@@ -50,7 +51,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("does not instance air, so the cursor can reach the pond", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
 
     let airCount = 0;
@@ -68,7 +69,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("separates water into a transparent mesh", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
 
     const transparent = layer.pickTargets.filter((mesh) => {
@@ -80,7 +81,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("round-trips a raycast hit back to its voxel index", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const mesh = layer.pickTargets[0] as InstancedMesh;
 
@@ -92,7 +93,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("returns null for a hit with no instance", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const mesh = layer.pickTargets[0] as InstancedMesh;
 
@@ -103,7 +104,7 @@ describe("createVoxelLayer", () => {
   it("leaves inert bedrock unmodulated", () => {
     // ROCK has no resource readout, so its brightness must not wander when the
     // world around it changes.
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const mesh = layer.pickTargets[0] as InstancedMesh;
     const rockSlot = findSlot(layer, mesh, world, Terrains.bit.ROCK);
@@ -124,7 +125,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("darkens a depleted voxel, so drawdown is visible without a panel", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const mesh = layer.pickTargets[0] as InstancedMesh;
     const soilSlot = findSlot(layer, mesh, world, Terrains.bit.SOIL);
@@ -147,7 +148,7 @@ describe("createVoxelLayer", () => {
   });
 
   it("tints highlighted voxels and clears them again", () => {
-    const world = createSimWorld({ seed: 1 });
+    const world = createTestWorld({ seed: 1 });
     const layer = createVoxelLayer(world);
     const mesh = layer.pickTargets[0] as InstancedMesh;
 

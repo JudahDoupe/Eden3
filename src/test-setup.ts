@@ -10,4 +10,10 @@ declare global {
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
+// Koota caps live worlds at 16 per process; release them between tests.
+import { afterEach } from "vitest";
+import { destroyTestWorlds } from "./testing/world";
+
+afterEach(destroyTestWorlds);
+
 export {};

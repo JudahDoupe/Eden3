@@ -1,4 +1,5 @@
-import { trait, type Entity } from "koota";
+import { relation, trait, type Entity } from "koota";
+import type { ActionName } from "./actions/ids";
 import { createGrid, type Grid } from "./grid";
 import { Rng } from "./rng";
 import { Terrains } from "./terrain";
@@ -71,3 +72,67 @@ export const ResourceBaseline = trait({ light: 0, oxygen: 0, nutrients: 0, moist
  * of the phase, so results do not depend on simulation order.
  */
 export const ResourceDelta = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });
+
+// --- Species entities -------------------------------------------------------
+//
+// A species is a definition, not an organism: it carries no position and no
+// energy. Creatures reference it through the `OfSpecies` relation.
+
+export const Species = trait({ id: "", name: "", colorHex: 0x888888, cardId: "" });
+
+/** What the species *is*. Gates card targeting, action availability, and predation. */
+export const SpeciesTags = trait({ mask: 0 });
+
+/**
+ * Which actions the species owns — inherited from its parent plus whatever its
+ * mutation card granted. Ownership is necessary but not sufficient: each action
+ * also demands tags, so losing a tag disables it without touching this mask.
+ */
+export const SpeciesActions = trait({ mask: 0 });
+
+/** Resources drawn from the voxel each turn. Zero means indifferent. */
+export const Needs = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });
+
+/** Resources returned to the voxel each turn. */
+export const Provides = trait({ light: 0, oxygen: 0, nutrients: 0, moisture: 0 });
+
+/** Terrain kinds this species can occupy. A mask, so amphibians are expressible. */
+export const Habitat = trait({ terrainMask: 0 });
+
+/** Tags this species can eat. Zero for autotrophs. */
+export const Diet = trait({ preyTagMask: 0 });
+
+/** Voxel radius reachable in one move. Zero for sessile species. */
+export const Locomotion = trait({ range: 0 });
+
+export const Life = trait({
+  maxAge: 20,
+  /** Energy burned per turn regardless of what the creature does. */
+  metabolism: 0.05,
+  maxEnergy: 1,
+  startingEnergy: 0.5,
+  /** Energy above which reproducing becomes attractive. */
+  reproduceThreshold: 0.7,
+  reproduceCost: 0.35,
+});
+
+/**
+ * Per-action utility multipliers — the primary tuning knob for species
+ * behaviour. AoS because there are few species and a real object reads better
+ * than a dozen parallel columns; missing entries default to 1.
+ */
+export const ActionWeights = trait(() => ({}) as Partial<Record<ActionName, number>>);
+
+/** Marks a species that has lost its last creature. */
+export const Extinct = trait({ turn: 0 });
+
+/** The evolutionary tree: a species points at the one it mutated from. */
+export const DescendedFrom = relation({ exclusive: true });
+
+// --- Creature entities ------------------------------------------------------
+
+/** One entity per (species, voxel) — "the worms in this voxel", not one worm. */
+export const Creature = trait({ age: 0, energy: 0 });
+
+export const OfSpecies = relation({ exclusive: true });
+export const InVoxel = relation({ exclusive: true });

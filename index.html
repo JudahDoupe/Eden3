@@ -158,6 +158,134 @@
         font-size: 0.75rem;
         color: #4d5f70;
       }
+      .panel--right {
+        max-height: calc(100vh - 2rem);
+        overflow-y: auto;
+      }
+      .panel button.ghost {
+        margin-top: 0.35rem;
+        border-color: #2b3742;
+        background: #141c24;
+        color: #8fa3b6;
+      }
+      .empty {
+        margin: 0.75rem 0 0;
+        font-size: 0.75rem;
+        color: #4d5f70;
+      }
+      .creature {
+        margin-top: 0.85rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid #1d2833;
+      }
+      .creature h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin: 0 0 0.3rem;
+        font-size: 0.82rem;
+      }
+      .creature__dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        border-radius: 50%;
+      }
+      .creature__vitals {
+        display: flex;
+        gap: 0.9rem;
+        margin: 0 0 0.4rem;
+        font-size: 0.72rem;
+        color: #7d8fa1;
+      }
+      .creature__vitals b {
+        color: #dce6f0;
+        font-variant-numeric: tabular-nums;
+      }
+      .actions {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.7rem;
+      }
+      .actions__row td {
+        padding: 0.1rem 0;
+      }
+      .actions__name {
+        width: 6.5rem;
+        color: #8fa3b6;
+      }
+      .actions__why {
+        position: relative;
+        height: 0.55rem;
+        color: #6b4f4f;
+      }
+      .actions__bar {
+        display: block;
+        height: 0.35rem;
+        border-radius: 0.2rem;
+        background: #3f6f57;
+      }
+      .actions__score {
+        width: 2.4rem;
+        text-align: right;
+        color: #9fb4c8;
+        font-variant-numeric: tabular-nums;
+      }
+      /* Unowned actions are absent; gated ones exist but a tag blocks them. */
+      .actions__row--unowned {
+        opacity: 0.28;
+      }
+      .actions__row--gated .actions__name {
+        color: #a06b6b;
+        text-decoration: line-through;
+      }
+      .actions__row--inert {
+        opacity: 0.55;
+      }
+      .actions__row--chosen .actions__name {
+        color: #7fd4a0;
+        font-weight: 700;
+      }
+      .actions__row--chosen .actions__bar {
+        background: #7fd4a0;
+      }
+      .panel--log {
+        top: auto;
+        bottom: 1rem;
+        left: 1rem;
+        max-width: 22rem;
+        max-height: 40vh;
+        overflow-y: auto;
+      }
+      .log {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 0.7rem;
+        display: grid;
+        gap: 0.12rem;
+      }
+      .log__line {
+        color: #8fa3b6;
+      }
+      .log__turn {
+        display: inline-block;
+        width: 2.2rem;
+        color: #4d5f70;
+        font-variant-numeric: tabular-nums;
+      }
+      .log__line--died {
+        color: #b98080;
+      }
+      .log__line--born {
+        color: #86c9a2;
+      }
+      .log__line--extinct {
+        color: #d98a5a;
+        font-weight: 600;
+      }
+      .log__line--ate {
+        color: #c2a86a;
+      }
     </style>
   </head>
   <body>

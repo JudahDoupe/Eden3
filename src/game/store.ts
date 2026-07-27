@@ -1,7 +1,9 @@
 import type { World } from "koota";
-import { applyEnvironment } from "../sim/resources";
-import { Clock, RunState, type Phase } from "../sim/traits";
-import { bumpVersion, createSimWorld, type SimConfig } from "../sim/world";
+import { createEventLog, type EventLog, type SimEvent } from "../sim/events";
+import { seedStartingLife } from "../sim/starters";
+import { runSimulationPhase } from "../sim/step";
+import { Creature, Extinct, RunState, Species, type Phase } from "../sim/traits";
+import { createSimWorld, getTurn, type SimConfig } from "../sim/world";
 
 /**
  * The single bridge between the simulation and everything that watches it.
@@ -17,6 +19,9 @@ export interface GameSnapshot {
   version: number;
   /** Voxel the player is inspecting, or null. Drives targeting from M4 on. */
   selectedVoxel: number | null;
+  population: number;
+  livingSpecies: number;
+  extinctSpecies: number;
 }
 
 export interface GameStore {
@@ -25,27 +30,47 @@ export interface GameStore {
   subscribe(listener: () => void): () => void;
   /** Referentially stable while nothing has changed, as `useSyncExternalStore` requires. */
   getSnapshot(): GameSnapshot;
+  /** Most recent events first. */
+  events(limit?: number): readonly SimEvent[];
   /** Advance the simulation one phase. */
   step(): void;
   selectVoxel(index: number | null): void;
   /** Abandon the current run and start a fresh one. */
   reset(config?: Partial<SimConfig>): void;
+  /** Release the underlying world. Koota allows only 16 live at once. */
+  dispose(): void;
 }
 
 export function createGameStore(config: Partial<SimConfig> = {}): GameStore {
-  let world = createSimWorld(config);
+  let world = start(config);
+  let log: EventLog = createEventLog();
   const listeners = new Set<() => void>();
   let selectedVoxel: number | null = null;
   let snapshot: GameSnapshot = read();
 
+  function start(next: Partial<SimConfig>): World {
+    const created = createSimWorld(next);
+    seedStartingLife(created);
+    return created;
+  }
+
   function read(): GameSnapshot {
-    const clock = world.get(Clock);
     const run = world.get(RunState);
+    let living = 0;
+    let extinct = 0;
+    for (const species of world.query(Species)) {
+      if (species.has(Extinct)) extinct++;
+      else living++;
+    }
+
     return {
-      turn: clock?.turn ?? 0,
+      turn: getTurn(world),
       phase: run?.phase ?? "player",
       version: run?.version ?? 0,
       selectedVoxel,
+      population: world.query(Creature).length,
+      livingSpecies: living,
+      extinctSpecies: extinct,
     };
   }
 
@@ -54,7 +79,10 @@ export function createGameStore(config: Partial<SimConfig> = {}): GameStore {
       a.turn === b.turn &&
       a.phase === b.phase &&
       a.version === b.version &&
-      a.selectedVoxel === b.selectedVoxel
+      a.selectedVoxel === b.selectedVoxel &&
+      a.population === b.population &&
+      a.livingSpecies === b.livingSpecies &&
+      a.extinctSpecies === b.extinctSpecies
     );
   }
 
@@ -84,13 +112,12 @@ export function createGameStore(config: Partial<SimConfig> = {}): GameStore {
       return snapshot;
     },
 
+    events(limit) {
+      return log.recent(limit);
+    },
+
     step() {
-      // TODO(M3): replace with `runSimulationPhase(world)`. Until creatures
-      // exist there is nothing to simulate before the environment settles.
-      const clock = world.get(Clock);
-      if (clock) world.set(Clock, { turn: clock.turn + 1 });
-      applyEnvironment(world);
-      bumpVersion(world);
+      runSimulationPhase(world, log);
       publish();
     },
 
@@ -100,10 +127,19 @@ export function createGameStore(config: Partial<SimConfig> = {}): GameStore {
     },
 
     reset(next = config) {
-      world = createSimWorld(next);
+      // Koota caps live worlds at 16, so the old one must go or the 17th
+      // restart of a session throws.
+      world.destroy();
+      world = start(next);
+      log = createEventLog();
       selectedVoxel = null;
       snapshot = read();
       for (const listener of listeners) listener();
+    },
+
+    dispose() {
+      listeners.clear();
+      world.destroy();
     },
   };
 }

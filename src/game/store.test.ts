@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { createGameStore } from "./store";
+import { createTestStore } from "../testing/world";
 import { getRng, getTurn } from "../sim/world";
 
 describe("createGameStore", () => {
   it("starts at turn 0 and advances one turn per step", () => {
-    const store = createGameStore();
+    const store = createTestStore();
     expect(store.getSnapshot().turn).toBe(0);
 
     store.step();
@@ -14,7 +14,7 @@ describe("createGameStore", () => {
 
   it("returns a referentially stable snapshot between steps", () => {
     // useSyncExternalStore re-renders forever if this ever fails.
-    const store = createGameStore();
+    const store = createTestStore();
     expect(store.getSnapshot()).toBe(store.getSnapshot());
 
     const before = store.getSnapshot();
@@ -23,7 +23,7 @@ describe("createGameStore", () => {
   });
 
   it("notifies subscribers on step and stops after unsubscribe", () => {
-    const store = createGameStore();
+    const store = createTestStore();
     const listener = vi.fn();
     const unsubscribe = store.subscribe(listener);
 
@@ -36,7 +36,7 @@ describe("createGameStore", () => {
   });
 
   it("tracks voxel selection and notifies once per change", () => {
-    const store = createGameStore();
+    const store = createTestStore();
     const listener = vi.fn();
     store.subscribe(listener);
 
@@ -56,18 +56,18 @@ describe("createGameStore", () => {
   });
 
   it("clears selection on reset", () => {
-    const store = createGameStore();
+    const store = createTestStore();
     store.selectVoxel(5);
     store.reset();
     expect(store.getSnapshot().selectedVoxel).toBeNull();
   });
 
   it("reseeds the world on reset", () => {
-    const store = createGameStore({ seed: 1, size: { x: 2, y: 2, z: 2 } });
+    const store = createTestStore({ seed: 1, size: { x: 2, y: 2, z: 2 } });
     store.step();
 
     store.reset({ seed: 99, size: { x: 2, y: 2, z: 2 } });
     expect(store.getSnapshot().turn).toBe(0);
-    expect(getRng(store.world).next()).toBe(getRng(createGameStore({ seed: 99, size: { x: 2, y: 2, z: 2 } }).world).next());
+    expect(getRng(store.world).next()).toBe(getRng(createTestStore({ seed: 99, size: { x: 2, y: 2, z: 2 } }).world).next());
   });
 });

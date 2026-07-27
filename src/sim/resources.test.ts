@@ -11,7 +11,8 @@ import {
 } from "./resources";
 import { Terrains } from "./terrain";
 import { ResourceBaseline, ResourceDelta, Resources, Voxel } from "./traits";
-import { createSimWorld, voxelAt } from "./world";
+import { voxelAt } from "./world";
+import { createTestWorld } from "../testing/world";
 
 describe("computeLight", () => {
   const grid = createGrid({ x: 1, y: 4, z: 1 });
@@ -67,14 +68,14 @@ describe("clampResource", () => {
 
 describe("applyEnvironment", () => {
   it("starts every voxel at its baseline, so a run opens settled", () => {
-    const world = createSimWorld({ seed: 2 });
+    const world = createTestWorld({ seed: 2 });
     world.query(Resources, ResourceBaseline).readEach(([levels, baseline]) => {
       for (const key of RESOURCE_KEYS) expect(levels[key]).toBeCloseTo(baseline[key], 10);
     });
   });
 
   it("applies accumulated deltas and then clears them", () => {
-    const world = createSimWorld({ seed: 2 });
+    const world = createTestWorld({ seed: 2 });
     const voxel = voxelAt(world, 0)!;
     const before = voxel.get(Resources)!.nutrients;
 
@@ -86,7 +87,7 @@ describe("applyEnvironment", () => {
   });
 
   it("drifts a depleted voxel back toward baseline", () => {
-    const world = createSimWorld({ seed: 2 });
+    const world = createTestWorld({ seed: 2 });
     const voxel = voxelAt(world, 0)!;
     const baseline = voxel.get(ResourceBaseline)!.moisture;
     voxel.set(Resources, { moisture: 0 });
@@ -99,7 +100,7 @@ describe("applyEnvironment", () => {
   });
 
   it("clamps rather than letting a large delta escape the range", () => {
-    const world = createSimWorld({ seed: 2 });
+    const world = createTestWorld({ seed: 2 });
     const voxel = voxelAt(world, 0)!;
 
     voxel.set(ResourceDelta, { oxygen: 99, nutrients: -99 });
@@ -111,7 +112,7 @@ describe("applyEnvironment", () => {
   });
 
   it("is order-independent: deltas are batched, not applied as they arrive", () => {
-    const world = createSimWorld({ seed: 2 });
+    const world = createTestWorld({ seed: 2 });
     const voxel = voxelAt(world, 0)!;
     voxel.set(Resources, { nutrients: 0.5 });
     voxel.set(ResourceBaseline, { nutrients: 0.5 });
@@ -127,7 +128,7 @@ describe("applyEnvironment", () => {
   });
 
   it("leaves every voxel in range after many turns", () => {
-    const world = createSimWorld({ seed: 4 });
+    const world = createTestWorld({ seed: 4 });
     for (let turn = 0; turn < 200; turn++) applyEnvironment(world);
 
     world.query(Voxel, Resources).readEach(([, levels]) => {

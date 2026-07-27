@@ -11,6 +11,7 @@ import {
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { World } from "koota";
 import { getGrid } from "../sim/world";
+import { createCreatureLayer, type CreatureLayer } from "./creatureLayer";
 import { createVoxelLayer, type VoxelLayer } from "./voxelLayer";
 
 /**
@@ -56,6 +57,9 @@ export function createRenderer(canvas: HTMLCanvasElement, world: World): Rendere
   const voxels: VoxelLayer = createVoxelLayer(world);
   scene.add(voxels.object);
 
+  const creatures: CreatureLayer = createCreatureLayer();
+  scene.add(creatures.object);
+
   const raycaster = new Raycaster();
   const pointer = new Vector2();
 
@@ -77,7 +81,7 @@ export function createRenderer(canvas: HTMLCanvasElement, world: World): Rendere
   return {
     sync(currentWorld) {
       voxels.sync(currentWorld);
-      // TODO(M3): rebuild the creature InstancedMesh from Creature entities.
+      creatures.sync(currentWorld);
     },
 
     highlight(voxelIndices) {
@@ -102,6 +106,7 @@ export function createRenderer(canvas: HTMLCanvasElement, world: World): Rendere
       window.removeEventListener("resize", resize);
       controls.dispose();
       voxels.dispose();
+      creatures.dispose();
       renderer.dispose();
     },
   };
