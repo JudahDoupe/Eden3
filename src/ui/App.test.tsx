@@ -38,11 +38,18 @@ afterEach(() => {
 });
 
 describe("App", () => {
-  it("renders the current turn and phase", () => {
+  it("renders the run's vital statistics", () => {
     const el = mount(createTestStore());
+    const stats = el.querySelectorAll("dd");
     expect(el.textContent).toContain("Eden");
-    expect(el.querySelectorAll("dd")[0]?.textContent).toBe("0");
-    expect(el.querySelectorAll("dd")[1]?.textContent).toBe("player");
+    expect(stats[0]?.textContent).toBe("0"); // turn
+    expect(stats[1]?.textContent).toBe("1"); // the starting amoeba
+    expect(stats[2]?.textContent).toBe("1"); // one species
+  });
+
+  it("deals an opening hand", () => {
+    const el = mount(createTestStore());
+    expect(el.querySelectorAll(".card").length).toBeGreaterThan(0);
   });
 
   it("advances the simulation when Pass is clicked, and re-renders", () => {

@@ -14,10 +14,16 @@ const root = document.getElementById("ui") as HTMLElement;
 const store = createGameStore();
 const renderer = createRenderer(canvas, store.world);
 
-// The renderer redraws on phase changes only; the animation loop it owns keeps
-// the camera responsive in between.
-renderer.sync(store.world);
-store.subscribe(() => renderer.sync(store.world));
+/**
+ * The renderer redraws on state changes only; the animation loop it owns keeps
+ * the camera responsive in between.
+ */
+function redraw(): void {
+  renderer.highlight(store.highlightedVoxels());
+  renderer.sync(store.world);
+}
+redraw();
+store.subscribe(redraw);
 
 // Hover-to-inspect. The store ignores a selection that did not change, so the
 // firehose of pointer events costs at most one React render per voxel crossed.
@@ -25,6 +31,20 @@ canvas.addEventListener("pointermove", (event) => {
   store.selectVoxel(renderer.pick(event.clientX, event.clientY));
 });
 canvas.addEventListener("pointerleave", () => store.selectVoxel(null));
+
+/**
+ * Targeting is diegetic: with a card selected, clicking a highlighted voxel in
+ * the world plays it there.
+ */
+canvas.addEventListener("click", (event) => {
+  const cardId = store.getSnapshot().selectedCard;
+  if (!cardId) return;
+
+  const voxelIndex = renderer.pick(event.clientX, event.clientY);
+  if (voxelIndex === null) return;
+
+  store.play(cardId, voxelIndex);
+});
 
 createRoot(root).render(
   <StrictMode>

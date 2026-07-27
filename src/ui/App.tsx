@@ -1,5 +1,7 @@
 import { inspectVoxel } from "../game/inspect";
 import { EventLog } from "./EventLog";
+import { Hand } from "./Hand";
+import { RunEnd } from "./RunEnd";
 import { useGameSnapshot, useGameStore } from "./useGame";
 import { VoxelInspector } from "./VoxelInspector";
 
@@ -8,13 +10,17 @@ import { VoxelInspector } from "./VoxelInspector";
  *
  * Everything here is pointer-transparent by default (see `index.html`) so the
  * camera stays draggable; individual panels opt back in.
+ *
+ * Targeting deliberately happens in the 3D world rather than here: selecting a
+ * card highlights its legal voxels and you click the world to play.
  */
 export function App() {
   const store = useGameStore();
-  const { turn, phase, selectedVoxel, population, livingSpecies, extinctSpecies } =
+  const { turn, phase, selectedVoxel, population, livingSpecies, extinctSpecies, deadlockTurns } =
     useGameSnapshot();
 
   const info = selectedVoxel === null ? null : inspectVoxel(store.world, selectedVoxel);
+  const running = phase !== "won" && phase !== "lost";
 
   return (
     <div className="hud">
@@ -23,8 +29,6 @@ export function App() {
         <dl>
           <dt>Turn</dt>
           <dd>{turn}</dd>
-          <dt>Phase</dt>
-          <dd>{phase}</dd>
           <dt>Creatures</dt>
           <dd>{population}</dd>
           <dt>Species</dt>
@@ -33,9 +37,16 @@ export function App() {
             {extinctSpecies > 0 && <span className="dim"> (+{extinctSpecies} extinct)</span>}
           </dd>
         </dl>
-        <button type="button" onClick={() => store.step()}>
-          Pass
-        </button>
+
+        {deadlockTurns > 0 && running ? (
+          <p className="warn">No legal play for {deadlockTurns} turns</p>
+        ) : null}
+
+        {running ? (
+          <button type="button" onClick={() => store.pass()}>
+            Pass
+          </button>
+        ) : null}
         <button type="button" className="ghost" onClick={() => store.reset()}>
           Restart
         </button>
@@ -43,7 +54,9 @@ export function App() {
 
       {info ? <VoxelInspector info={info} /> : <p className="hint">Hover a voxel to inspect it</p>}
 
-      <EventLog events={store.events(14)} />
+      <EventLog events={store.events(12)} />
+      <Hand />
+      <RunEnd />
     </div>
   );
 }

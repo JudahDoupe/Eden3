@@ -7,7 +7,7 @@ describe("createGameStore", () => {
     const store = createTestStore();
     expect(store.getSnapshot().turn).toBe(0);
 
-    store.step();
+    store.pass();
     expect(store.getSnapshot().turn).toBe(1);
     expect(getTurn(store.world)).toBe(1);
   });
@@ -18,7 +18,7 @@ describe("createGameStore", () => {
     expect(store.getSnapshot()).toBe(store.getSnapshot());
 
     const before = store.getSnapshot();
-    store.step();
+    store.pass();
     expect(store.getSnapshot()).not.toBe(before);
   });
 
@@ -27,11 +27,11 @@ describe("createGameStore", () => {
     const listener = vi.fn();
     const unsubscribe = store.subscribe(listener);
 
-    store.step();
+    store.pass();
     expect(listener).toHaveBeenCalledTimes(1);
 
     unsubscribe();
-    store.step();
+    store.pass();
     expect(listener).toHaveBeenCalledTimes(1);
   });
 
@@ -64,7 +64,7 @@ describe("createGameStore", () => {
 
   it("reseeds the world on reset", () => {
     const store = createTestStore({ seed: 1, size: { x: 2, y: 2, z: 2 } });
-    store.step();
+    store.pass();
 
     store.reset({ seed: 99, size: { x: 2, y: 2, z: 2 } });
     expect(store.getSnapshot().turn).toBe(0);

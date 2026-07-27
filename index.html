@@ -286,6 +286,168 @@
       .log__line--ate {
         color: #c2a86a;
       }
+      .log__line--mutated {
+        color: #7fd4a0;
+        font-weight: 600;
+      }
+      .warn {
+        margin: 0 0 0.5rem;
+        font-size: 0.7rem;
+        color: #d98a5a;
+      }
+
+      /* --- Hand --------------------------------------------------------- */
+      .hand {
+        position: absolute;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        pointer-events: auto;
+      }
+      .card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        width: 9.5rem;
+        min-height: 8.5rem;
+        padding: 0.6rem 0.65rem 1.6rem;
+        border: 1px solid #23303d;
+        border-top: 3px solid #7fd4a0;
+        border-radius: 0.45rem;
+        background: #0f161eec;
+        backdrop-filter: blur(6px);
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+        transition: transform 0.12s ease;
+      }
+      .card:hover {
+        transform: translateY(-0.25rem);
+      }
+      .card--selected {
+        transform: translateY(-0.6rem);
+        box-shadow: 0 0 0 1px #7fd4a0;
+      }
+      .card--dead {
+        opacity: 0.42;
+        cursor: not-allowed;
+      }
+      .card--dead:hover {
+        transform: none;
+      }
+      .card__name {
+        font-size: 0.85rem;
+        font-weight: 700;
+      }
+      .card__blurb {
+        font-size: 0.66rem;
+        line-height: 1.25;
+        color: #8fa3b6;
+      }
+      .card__rules {
+        margin-top: auto;
+        font-size: 0.62rem;
+        color: #64798c;
+      }
+      .card__rules b {
+        color: #4d5f70;
+        font-weight: 600;
+      }
+      .card__reason {
+        font-size: 0.62rem;
+        line-height: 1.2;
+        color: #b98080;
+      }
+      .card__hint {
+        font-size: 0.62rem;
+        color: #7fd4a0;
+      }
+      .card__cycle {
+        position: absolute;
+        right: 0.5rem;
+        bottom: 0.4rem;
+        font-size: 0.6rem;
+        color: #5b6f82;
+        text-decoration: underline;
+      }
+      .card__cycle:hover {
+        color: #9fb4c8;
+      }
+      .hand__deck {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0 0.5rem 0.5rem;
+        font-size: 0.65rem;
+        color: #64798c;
+      }
+      .hand__deck b {
+        font-size: 1.1rem;
+        color: #dce6f0;
+      }
+
+      /* --- End of run --------------------------------------------------- */
+      .runend {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: #060a0ecc;
+        pointer-events: auto;
+      }
+      .runend__card {
+        min-width: 20rem;
+        padding: 1.5rem 1.75rem;
+        border: 1px solid #23303d;
+        border-radius: 0.6rem;
+        background: #0f161e;
+        text-align: center;
+      }
+      .runend__card h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.3rem;
+      }
+      .runend__won {
+        color: #7fd4a0;
+      }
+      .runend__lost {
+        color: #c98686;
+      }
+      .runend__reason {
+        margin: 0 0 1rem;
+        font-size: 0.8rem;
+        color: #8fa3b6;
+      }
+      .runend__stats {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 0.2rem 1rem;
+        margin: 0 0 1.2rem;
+        font-size: 0.78rem;
+        text-align: left;
+      }
+      .runend__stats dt {
+        color: #7d8fa1;
+      }
+      .runend__stats dd {
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+      }
+      .runend button {
+        width: 100%;
+        padding: 0.45rem;
+        border: 1px solid #2f4a3c;
+        border-radius: 0.3rem;
+        background: #17251d;
+        color: #9fe0bb;
+        font: inherit;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
