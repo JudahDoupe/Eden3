@@ -1,0 +1,4 @@
+BuilderBot writes one acceptance spec per acceptance criterion into this directory, before any
+implementation exists. They are excluded from `npm test` (they are red until their criterion is built)
+and run explicitly, per task, via vitest.acceptance.config.ts. Implementers are fenced out of this
+directory: the orchestrator refuses any edit to it, so a spec can never be rewritten to pass.

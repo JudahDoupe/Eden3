@@ -13,5 +13,9 @@ export default defineConfig({
     // with a `// @vitest-environment jsdom` docblock.
     environment: "node",
     setupFiles: ["./src/test-setup.ts"],
+    // BuilderBot's acceptance specs (one per acceptance criterion) live in src/acceptance/ and are RED
+    // until their criterion is implemented, so they must not fail the ordinary test run. They are
+    // executed explicitly, per task, via vitest.acceptance.config.ts.
+    exclude: ["**/node_modules/**", "**/dist/**", "src/acceptance/**"],
   },
 });
