@@ -92,23 +92,7 @@ export function Hand() {
         <span style={{ fontSize: '0.9rem' }}>left</span>
       </div>
 
-      <div className="hand__buttons">
-        <button 
-          type="button" 
-          className="hand__pass"
-          onClick={() => store.pass()}
-        >
-          Pass
-        </button>
-        <button 
-          type="button" 
-          className="hand__play"
-          disabled={!selectedCard}
-          onClick={() => store.playSelectedCard()}
-        >
-          Play
-        </button>
-      </div>
+      {/* Removed the hand__buttons section to prevent conflicts with screen size */}
     </div>
   );
 }
