@@ -26,7 +26,11 @@ export function Hand() {
             key={cardId}
             type="button"
             className={`card ${playable ? "" : "card--dead"} ${selected ? "card--selected" : ""}`}
-            style={{ borderTopColor: `#${card.colorHex.toString(16).padStart(6, "0")}` }}
+            style={{ 
+              borderTopColor: `#${card.colorHex.toString(16).padStart(6, "0")}`,
+              height: '17rem', // Twice as tall as wide (9.5rem * 2 = 19rem, but making it 17rem for better fit)
+              width: '9.5rem'
+            }}
             onClick={() => store.selectCard(selected ? null : cardId)}
           >
             <span className="card__name">{card.name}</span>
