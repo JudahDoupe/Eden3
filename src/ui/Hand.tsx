@@ -42,7 +42,7 @@ export function Hand() {
               width: '9.5rem',
               fontSize: '1.2rem', // Increased text size for better mobile readability
               zIndex,
-              transform: `scaleY(${scale})`,
+              transform: `scale(${scale})`,
               transformOrigin: 'bottom',
               transition: 'transform 0.2s ease, z-index 0.2s ease'
             }}
