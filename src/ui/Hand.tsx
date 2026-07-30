@@ -91,6 +91,24 @@ export function Hand() {
         <b style={{ fontSize: '1.3rem' }}>{deckRemaining}</b>
         <span style={{ fontSize: '0.9rem' }}>left</span>
       </div>
+
+      <div className="hand__buttons">
+        <button 
+          type="button" 
+          className="hand__pass"
+          onClick={() => store.pass()}
+        >
+          Pass
+        </button>
+        <button 
+          type="button" 
+          className="hand__play"
+          disabled={!selectedCard}
+          onClick={() => store.playSelectedCard()}
+        >
+          Play
+        </button>
+      </div>
     </div>
   );
 }
