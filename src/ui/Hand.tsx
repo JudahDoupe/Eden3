@@ -28,15 +28,16 @@ export function Hand() {
             className={`card ${playable ? "" : "card--dead"} ${selected ? "card--selected" : ""}`}
             style={{ 
               borderTopColor: `#${card.colorHex.toString(16).padStart(6, "0")}`,
-              height: '17rem', // Twice as tall as wide (9.5rem * 2 = 19rem, but making it 17rem for better fit)
-              width: '9.5rem'
+              height: '17rem',
+              width: '9.5rem',
+              fontSize: '1.2rem' // Increased text size for better mobile readability
             }}
             onClick={() => store.selectCard(selected ? null : cardId)}
           >
-            <span className="card__name">{card.name}</span>
-            <span className="card__blurb">{card.blurb}</span>
+            <span className="card__name" style={{ fontSize: '1.1rem' }}>{card.name}</span>
+            <span className="card__blurb" style={{ fontSize: '0.9rem' }}>{card.blurb}</span>
 
-            <span className="card__rules">
+            <span className="card__rules" style={{ fontSize: '0.85rem' }}>
               <b>on</b> {card.requiresTags.join(" + ").toLowerCase() || "anything"}
               {card.removesTags?.length ? (
                 <>
@@ -46,10 +47,10 @@ export function Hand() {
               ) : null}
             </span>
 
-            {!playable && reason ? <span className="card__reason">{reason}</span> : null}
+            {!playable && reason ? <span className="card__reason" style={{ fontSize: '0.85rem' }}>{reason}</span> : null}
 
             {playable && selected ? (
-              <span className="card__hint">click a highlighted voxel</span>
+              <span className="card__hint" style={{ fontSize: '0.85rem' }}>click a highlighted voxel</span>
             ) : null}
 
             <span
@@ -74,8 +75,8 @@ export function Hand() {
       })}
 
       <div className="hand__deck">
-        <b>{deckRemaining}</b>
-        <span>left</span>
+        <b style={{ fontSize: '1.3rem' }}>{deckRemaining}</b>
+        <span style={{ fontSize: '0.9rem' }}>left</span>
       </div>
     </div>
   );
