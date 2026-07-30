@@ -16,10 +16,20 @@ export function Hand() {
 
   return (
     <div className="hand">
-      {hand.map((cardId) => {
+      {hand.map((cardId, index) => {
         const card = cardById(cardId);
         const { playable, reason } = store.playability(cardId);
         const selected = selectedCard === cardId;
+        
+        // Calculate z-index and scale for visual feedback
+        let zIndex = 0;
+        let scale = 1;
+        if (selected) {
+          zIndex = 1000;
+          scale = 2;
+        } else if (index < hand.indexOf(selectedCard)) {
+          zIndex = 1000 - (hand.indexOf(selectedCard) - index);
+        }
 
         return (
           <button
@@ -30,7 +40,10 @@ export function Hand() {
               borderTopColor: `#${card.colorHex.toString(16).padStart(6, "0")}`,
               height: '17rem',
               width: '9.5rem',
-              fontSize: '1.2rem' // Increased text size for better mobile readability
+              fontSize: '1.2rem', // Increased text size for better mobile readability
+              zIndex,
+              transform: `scale(${scale})`,
+              transition: 'transform 0.2s ease, z-index 0.2s ease'
             }}
             onClick={() => store.selectCard(selected ? null : cardId)}
           >
