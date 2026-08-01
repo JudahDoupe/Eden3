@@ -42,7 +42,7 @@
       }
       .panel h1 {
         margin: 0 0 0.5rem;
-        font-size: 1rem;
+        font-size: 1.2rem;
         letter-spacing: 0.08em;
         text-transform: uppercase;
         color: #7fd4a0;
@@ -52,7 +52,7 @@
         grid-template-columns: auto 1fr;
         gap: 0.15rem 0.75rem;
         margin: 0 0 0.75rem;
-        font-size: 0.85rem;
+        font-size: 1rem;
       }
       .panel dt {
         color: #7d8fa1;
@@ -63,13 +63,13 @@
       }
       .panel button {
         width: 100%;
-        padding: 0.4rem;
+        padding: 0.5rem;
         border: 1px solid #2f4a3c;
         border-radius: 0.3rem;
         background: #17251d;
         color: #9fe0bb;
         font: inherit;
-        font-size: 0.85rem;
+        font-size: 1rem;
         cursor: pointer;
       }
       .panel button:hover {
@@ -80,84 +80,84 @@
         right: 1rem;
         min-width: 15rem;
       }
-      .panel h2 {
-        margin: 0 0 0.35rem;
-        font-size: 0.9rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-        color: #9fb4c8;
-      }
-      .dim {
-        color: #64798c;
-        font-variant-numeric: tabular-nums;
-      }
-      .terrain {
-        margin: 0 0 0.75rem;
-        font-size: 0.8rem;
-        letter-spacing: 0.1em;
-      }
-      .terrain--water {
-        color: #58a6d8;
-      }
-      .terrain--soil {
-        color: #b08a5c;
-      }
-      .terrain--rock {
-        color: #8d8d99;
-      }
-      .terrain--air {
-        color: #7d8fa1;
-      }
-      .bars {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 0.3rem;
-        font-size: 0.75rem;
-      }
-      .bars li {
-        display: grid;
-        grid-template-columns: 4.5rem 1fr 2.2rem;
-        align-items: center;
-        gap: 0.5rem;
-      }
-      .bars__label {
-        color: #7d8fa1;
-      }
-      .bars__track {
-        position: relative;
-        height: 0.5rem;
-        border-radius: 0.25rem;
-        background: #1b2733;
-        overflow: hidden;
-      }
-      .bars__fill {
-        position: absolute;
-        inset: 0 auto 0 0;
-        background: linear-gradient(90deg, #2f6f52, #7fd4a0);
-      }
-      /* Tick marking the resting level: current vs. baseline is what shows depletion. */
-      .bars__baseline {
-        position: absolute;
-        top: -1px;
-        bottom: -1px;
-        width: 1px;
-        background: #e4b363;
-      }
-      .bars__value {
-        text-align: right;
-        color: #b7c6d4;
-        font-variant-numeric: tabular-nums;
-      }
-      .hint {
-        position: absolute;
-        right: 1rem;
-        top: 1rem;
-        margin: 0;
-        font-size: 0.75rem;
-        color: #4d5f70;
-      }
+.panel h2 {
+          margin: 0 0 0.35rem;
+          font-size: 1.1rem;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #9fb4c8;
+        }
+        .dim {
+          color: #64798c;
+          font-variant-numeric: tabular-nums;
+        }
+        .terrain {
+          margin: 0 0 0.75rem;
+          font-size: 1rem;
+          letter-spacing: 0.1em;
+        }
+        .terrain--water {
+          color: #58a6d8;
+        }
+        .terrain--soil {
+          color: #b08a5c;
+        }
+        .terrain--rock {
+          color: #8d8d99;
+        }
+        .terrain--air {
+          color: #7d8fa1;
+        }
+        .bars {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          display: grid;
+          gap: 0.3rem;
+          font-size: 0.9rem;
+        }
+        .bars li {
+          display: grid;
+          grid-template-columns: 4.5rem 1fr 2.2rem;
+          align-items: center;
+          gap: 0.5rem;
+        }
+        .bars__label {
+          color: #7d8fa1;
+        }
+        .bars__track {
+          position: relative;
+          height: 0.5rem;
+          border-radius: 0.25rem;
+          background: #1b2733;
+          overflow: hidden;
+        }
+        .bars__fill {
+          position: absolute;
+          inset: 0 auto 0 0;
+          background: linear-gradient(90deg, #2f6f52, #7fd4a0);
+        }
+        /* Tick marking the resting level: current vs. baseline is what shows depletion. */
+        .bars__baseline {
+          position: absolute;
+          top: -1px;
+          bottom: -1px;
+          width: 1px;
+          background: #e4b363;
+        }
+        .bars__value {
+          text-align: right;
+          color: #b7c6d4;
+          font-variant-numeric: tabular-nums;
+        }
+        .hint {
+          position: absolute;
+          right: 1rem;
+          top: 1rem;
+          margin: 0;
+          font-size: 0.9rem;
+          color: #4d5f70;
+        }
       .panel--right {
         max-height: calc(100vh - 2rem);
         overflow-y: auto;
