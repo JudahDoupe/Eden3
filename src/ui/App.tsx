@@ -43,14 +43,29 @@ export function App() {
           <p className="warn">No legal play for {deadlockTurns} turns</p>
         ) : null}
 
-        {running ? (
+      {running ? (
+        <div className="hand__buttons">
           <button type="button" onClick={() => store.pass()}>
             Pass
           </button>
-        ) : null}
-        <button type="button" className="ghost" onClick={() => store.reset()}>
-          Restart
-        </button>
+          <button 
+            type="button" 
+            className="play-button"
+            disabled={!store.getSnapshot().selectedCard}
+            onClick={() => {
+              const snapshot = store.getSnapshot();
+              if (snapshot.selectedCard) {
+                store.play(snapshot.selectedCard, store.highlightedVoxels()[0]);
+              }
+            }}
+          >
+            Play
+          </button>
+        </div>
+      ) : null}
+      <button type="button" className="ghost" onClick={() => store.reset()}>
+        Restart
+      </button>
       </div>
 
       {info ? <VoxelInspector info={info} /> : <p className="hint">Hover a voxel to inspect it</p>}
